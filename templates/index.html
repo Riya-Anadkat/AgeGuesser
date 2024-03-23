@@ -76,26 +76,7 @@
         </div>
         <img id="overlay" src="{{ url_for('static', filename='assets/mirror.png') }}" alt="Overlay Image">
     </div>
-
-    <script>
-        function updateRandomNumber() {
-            var randomNumber = Math.floor(Math.random() * 101);
-            document.getElementById("random-number").textContent = randomNumber;
-        }
-
-        setInterval(updateRandomNumber, 200);
-    </script>
-
-    <script>
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function (stream) {
-                var video = document.getElementById('video');
-                video.srcObject = stream;
-            })
-            .catch(function (err) {
-                console.error('Error accessing the camera:', err);
-            });
-    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
 </html>
