@@ -1,11 +1,15 @@
-# import cv2
+import cv2
 import base64
 from flask import Flask, render_template, request, jsonify
 from azure.cognitiveservices.vision.face import FaceClient
 from msrest.authentication import CognitiveServicesCredentials
 from dotenv import load_dotenv
+import random
 import numpy as np
 import os
+import io
+import time
+import requests
 
 load_dotenv()
 
@@ -20,33 +24,50 @@ face_client = FaceClient(app.config['ENDPOINT'], CognitiveServicesCredentials(ap
 
 # def detect_age(image_path):
 #     h
+def capture_image_from_camera_detect_age():
 
-def detect_age(frame_data):
-    frame_np = np.frombuffer(frame_data, dtype=np.uint8)
-
-    # frame_np = np.array(frame_data, dytpe=np.uint8)
-    # _, img_encoded = cv2.imencode('.jpg', frame_np)
-    # image_stream = img_encoded.tobytes()
+    cap = cv2.VideoCapture(0)
     
-    # print(image_stream)
-    # detected_faces = face_client.face.detect_with_stream(image=image_stream, recognition_model='recognition_04', return_face_attributes=['age'])
+    if not cap.isOpened():
+        print("Error: Could not open camera.")
+        return
+    
+    ret, frame = cap.read()
+    
+    if not ret:
+        print("Error: Could not capture frame.")
+        return
+    
+    image_file = f"image.jpg" 
+    cv2.imwrite(image_file, frame)
+    print(f"Image captured and saved as '{image_file}'")
+    
+    cap.release()
 
-    # if not detected_faces:
-    #     print("No faces detected")
-    #     return False
+    url = "https://age-detector.p.rapidapi.com/age-detection"
 
-    # age = detected_faces[0].face_attribute.age
-    # print(f"Estimated age is {age}")
+    payload = { "url": "image.jpg" }
+    headers = {
+        "content-type": "application/json",
+        "X-RapidAPI-Key": "684172fe98msh67e7acd932504a9p1d161bjsn3e5443e58cc6",
+        "X-RapidAPI-Host": "age-detector.p.rapidapi.com"
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+
+    print(response.json())
+
+
     return True
 
-@app.route('/capture_frame', methods=['POST'])
-def capture_frame():
-    frame_data_base64 = request.json['frame']
-    frame_data = base64.b64decode(frame_data_base64.split(",")[1]) 
+while True:
+    capture_image_from_camera_detect_age()
+    time.sleep(30)
 
-    # print(frame_data)
-    detect_age(frame_data)
-    return jsonify({'message': 'Frame received successfully'})
+
+@app.route('/random_num', methods=['GET'])
+def random_num():
+   return random.randint(0,100)
 
 @app.route('/')
 def index():

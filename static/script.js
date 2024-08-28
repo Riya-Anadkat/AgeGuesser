@@ -37,5 +37,5 @@ navigator.mediaDevices.getUserMedia({
         console.error('Error accessing the camera:', err);
     });
 
-setInterval(getFrame, 3000);
+// setInterval(getFrame, 3000);
 setInterval(updateRandomNumber, 200);
